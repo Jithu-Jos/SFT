@@ -3,7 +3,6 @@
 
 # In[ ]:
 
-
 ## Importing required modules
 
 import numpy as np
