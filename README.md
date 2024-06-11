@@ -10,7 +10,13 @@ The repository includes four files:
 3. 2D_numerical.py  (Explicit and RK-IMEX)
 4. 2D_PINNs.py
 
+## Requirements
 
+To get started with this project, you need to install the following dependencies:
+
+- [DeepXDE](https://deepxde.readthedocs.io/en/latest/user/installation.html)
+- NumPy
+- Matplotlib
 
 
 
