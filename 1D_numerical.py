@@ -594,7 +594,7 @@ plt.xlabel("Time")
 plt.ylabel("Latitude")
 plt.title("PINNs")
 plt.colorbar(im,location="bottom", aspect=70, extend="both", label="B")
-plt.title("Magnetic field solving the 1D SFT equation   num")
+plt.title("Magnetic field solving the 1D SFT equation Explicit")
 plt.show()
 
 
@@ -603,6 +603,6 @@ plt.xlabel("Time")
 plt.ylabel("Latitude")
 plt.title("PINNs")
 plt.colorbar(im,location="bottom", aspect=70, extend="both", label="B")
-plt.title("Magnetic field solving the 1D SFT equation  rk")
+plt.title("Magnetic field solving the 1D SFT equation RK-IMEX")
 plt.show()
 
