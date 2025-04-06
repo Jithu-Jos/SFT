@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 ## Importing required modules
 
 import numpy as np
@@ -14,11 +9,7 @@ import time as time
 
 ## End importing required modules
 
-
 # ## Code Units
-
-# In[ ]:
-
 
 ## The time in years for which the simulation is conducted
 simul_time = 24.0     # 24 years
@@ -36,11 +27,7 @@ V_unit = L_unit / T_unit    # Velocity unit in centimeters per second
 
 deg_2_rad = np.pi / 180.0
 
-
 # ## Constants and Parameters
-
-# In[ ]:
-
 
 ##solar radius
 r = Rsun / L_unit   #(6.95e-10 cm)
@@ -69,11 +56,7 @@ chat = 0.71
 sourcescale = 0.003 * 10000 / B_unit 
 cycleper = 11.0 * 365.25   # Solar cycle duration in days (11 years)
 
-
 # ## Different terms of SFT
-
-# In[ ]:
-
 
 @jit(nopython = True)
 def source_num(latitude, t):
@@ -141,10 +124,6 @@ def esc(lam, r, eta, tau_esc):
 def initial(lam):
     return B0 * np.sin(lam)
 
-
-# In[ ]:
-
-
 # Tridiagonal solver - Thomas algorithm
 @jit(nopython = True)
 def tridiag2(n, a, b, c, d):
@@ -187,12 +166,8 @@ def tridiag2(n, a, b, c, d):
     new[0] = 0
     new[1] = 0
     return new
-
-
+    
 # ## Simulation domain
-
-# In[ ]:
-
 
 num_files = 1000    # Temporal resolution
 Tmin = 0.0    # Initial time stamp
@@ -201,10 +176,6 @@ Tmax = 1.0    # Final time stamp
 res = 1024  # 128,256,384,512,1024   Spatial resolution
 lat_min = -70.0   # Minimum latitude in degrees
 lat_max = 70.0   # Maximum latitude in degrees
-
-
-# In[ ]:
-
 
 # Discretization
 dt = (Tmax - Tmin) / num_files  # Time step size
@@ -223,16 +194,8 @@ for i in range(len(lat_cen)):
     lat_width[i] = lat_right[i] - lat_left[i] 
 #     print(lat_width[i])  
 
-
-# In[ ]:
-
-
 B_explicit=np.zeros((num_files+1,res))    # To store solution explicit scheme
 B_RK_IMEX=np.zeros((num_files+1,res))    # To store solution RK-IMEX scheme
-
-
-# In[ ]:
-
 
 ## initial condition
 
@@ -248,10 +211,6 @@ plt.show()
 
 B_explicit[0] = mag
 B_RK_IMEX[0] = mag
-
-
-# In[ ]:
-
 
 courant_number = 0.4  # CFL number
 courant_array = np.zeros(res)  
@@ -276,16 +235,11 @@ else:
 print("steps =", nsub)
 print("CFL dt =", dt)
 
-
 # ## RK-IMEX
-
-# In[ ]:
-
 
 @jit(nopython = True)
 def diffusion(rho, lat_width, k):
     return eta*(rho[k+1] - 2*rho[k] + rho[k-1])/(lat_width*lat_width)
-
 
 @jit(nopython = True)
 def advection(rho, grid_cent,grid_left, grid_right, dt, lat_width, i, t):
@@ -450,12 +404,7 @@ def rkimex(mag,time,dt):
 
     return mag_new2
 
-
 # ## Explicit scheme
-
-# In[ ]:
-
-
 """
         Function used to update using standard scheme  returns the updated value
         The function updates for 1 n_sub
@@ -542,11 +491,7 @@ def lat_update(mag,time,dt):
     mag[res-1] = mag[res-4]
     return mag
 
-
 # ## Solving
-
-# In[ ]:
-
 
 # update using Explicit scheme
 time = np.zeros(num_files+1) 
@@ -572,10 +517,6 @@ for i in tqdm(range(num_files)):
         mag = np.copy(mag_1)
     B_RK_IMEX[i+1] = mag_1
 
-
-# In[ ]:
-
-
 ## To save the files
 # variable_name = f"numeric_1D_num_{res}.npy"
 # np.save(variable_name, B_explicit)
@@ -583,11 +524,7 @@ for i in tqdm(range(num_files)):
 # variable_name = f"numeric_1D_rk_{res}.npy"
 # np.save(variable_name, B_RK_IMEX)
 
-
 # ## Plotting
-
-# In[ ]:
-
 
 im = plt.imshow(B_explicit.T*10.0, vmin=-5.0, vmax=5.0, aspect="auto", origin="lower", extent=[0, simul_time, lat_min, lat_max])
 plt.xlabel("Time")
