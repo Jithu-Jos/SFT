@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 ##Importing required modules
 
 import numpy as np
@@ -13,11 +8,7 @@ import time as tt
 from tqdm import tqdm
 ##End importing required modules
 
-
 # ## Code Units
-
-# In[ ]:
-
 
 ##The time in years for which the simulation is conducted
 simul_time = 0.30     # in years
@@ -36,11 +27,7 @@ V_unit = L_unit / T_unit    # Velocity unit in centimeters per second
 deg_2_rad = np.pi / 180.0
 pi = tf.constant(np.pi)
 
-
 # ## Constants and Parameters
-
-# In[ ]:
-
 
 ##solar radius
 r = Rsun / L_unit #(6.95e-10 cm)
@@ -62,10 +49,6 @@ tau = tau / T_unit
 ## Initial amplitude of magnetic field
 B0 = 10.0    # in Gauss
 B0 = B0 / B_unit
-
-
-# In[ ]:
-
 
 # initial condition
 def initial(x):
@@ -111,11 +94,7 @@ def initial(x):
     delta_Br = B_plus - B_minus
     return delta_Br
 
-
 # ## SFT equation
-
-# In[ ]:
-
 
 # Advection velocity
 def adv(lam):
@@ -165,12 +144,7 @@ def boundary_lam(x, on_boundary):
 def boundary_phi(x, on_boundary):
     return (on_boundary and (isclose(x[1], phi_max) or isclose(x[1], phi_min)))
     
-
-
 # ## PINNs
-
-# In[ ]:
-
 
 ## Simulation box
 lam_min = -0.40  # -0.40 * pi in radian
@@ -195,10 +169,6 @@ net = dde.nn.FNN(layer_size, activation, initializer)
 # print("u_0",u_0)
 # print("tau",tau)
 
-
-# In[ ]:
-
-
 bc_lam = dde.icbc.NeumannBC(geomtime, lambda x:0 , boundary_lam)   # Boundary Condition for latitude
 bc_phi = dde.icbc.PeriodicBC(geomtime, 1, boundary_phi)   # Boundary Condition for longitude 
 ic = dde.icbc.IC(geomtime, initial, lambda _, on_initial: on_initial)
@@ -216,10 +186,6 @@ data = dde.data.TimePDE(
     num_test = 1000
 )
 
-
-# In[ ]:
-
-
 # Create the model using the defined data and neural network
 model01 = dde.Model(data, net)
 
@@ -231,19 +197,11 @@ losshistory, train_state = model01.train(iterations=199495,     # Total iteratio
 
 dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
-
-# In[ ]:
-
-
 model01.compile("L-BFGS",loss_weights=[1, 1,1, 1])    # Compile the model with the L-BFGS optimizer and loss weights          # Optimizer used and the learning rate
 losshistory, train_state = model01.train(display_every = 5000)
 dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
-
 # ## To produce pinn solutions for different resolutions
-
-# In[ ]:
-
 
 lat_max = 0.40*180.0  
 lat_min = -0.40*180.0 
@@ -311,11 +269,7 @@ for i in range(len(res_lat_values)):
     variable_name = f"pinns_2D_{res_lon_values[i]}.npy"
     np.save(variable_name,re)
 
-
 # ## Plotting
-
-# In[ ]:
-
 
 plt.figure(figsize=(10, 6))
 im = plt.imshow(re[-1], origin = "lower", extent=[lon_min, lon_max, lat_min, lat_max])
