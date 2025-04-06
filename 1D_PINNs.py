@@ -1,10 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 ##Importing required modules
-
 import numpy as np
 import matplotlib.pyplot as plt
 import deepxde as dde
@@ -13,11 +7,7 @@ import time as tt
 from tqdm import tqdm
 ##End importing required modules
 
-
 # ## Code Units
-
-# In[ ]:
-
 
 ## The time in years for which the simulation is conducted
 simul_time = 24.0     # 24 years
@@ -36,11 +26,7 @@ V_unit = L_unit / T_unit    # Velocity unit in centimeters per second
 deg_2_rad = np.pi / 180.0
 pi = tf.constant(np.pi)
 
-
 # ## Constants and Parameters
-
-# In[ ]:
-
 
 ##solar radius
 r = Rsun / L_unit #(6.95e-10 cm)
@@ -70,10 +56,6 @@ chat = 0.71
 sourcescale = 0.003 * 10000 / B_unit
 cycleper = 11.0 * 365.25   # Solar cycle duration in days (11 years)
 
-
-# In[ ]:
-
-
 # Integration by trapezoidal rule
 def trapezoidal_integration(func, a, b, n):
     x = np.linspace(a, b, n+1).astype(np.float32)
@@ -85,11 +67,7 @@ def trapezoidal_integration(func, a, b, n):
     integral = tf.reduce_sum(integrand)
     return integral
 
-
 # ## SFT equation
-
-# In[ ]:
-
 
 def source(latitude, t):
     latitude = tf.cast(latitude, tf.float32)
@@ -101,7 +79,6 @@ def source(latitude, t):
     lambda0 = 26.4 - 34.2 * ((t / cycleper) % 1) + 16.1 * ((t / cycleper) % 1)**2
     fwhm = 6.0
     joynorm = 0.5 / tf.sin(20.0 / 180 * np.pi)
-    
     
     bandn1 = evenodd * ampli * tf.exp(-(latitude - lambda0 - joynorm * tf.sin(lambda0 / 180 * np.pi))**2 / (2 * fwhm**2))
     bandn2a = -evenodd * ampli * tf.exp(-(latitude - lambda0 + joynorm * tf.sin(lambda0 / 180 * np.pi))**2 / (2 * fwhm**2))
@@ -127,10 +104,6 @@ def source(latitude, t):
     value=bandn1+bandn2+bands1+bands2
 
     return value
-
-
-# In[ ]:
-
 
 # Advection velocity
 def adv(lam):
@@ -161,11 +134,7 @@ def init(x):
 def boundary(x, on_boundary):
     return on_boundary
 
-
 # ## PINNs
-
-# In[ ]:
-
 
 lam_max = 0.40  # Maximum latitude in radians (0.40*pi)
 lam_min = -0.40 # Minimum latitude in radians (-0.40*pi)
@@ -186,10 +155,6 @@ net = dde.nn.FNN(layer_size, activation, initializer)
 # print("u_0", u_0)   
 # print("tau", tau)   
 
-
-# In[ ]:
-
-
 ic = dde.icbc.IC(geomtime, init, lambda _, on_initial: on_initial)    # Define the initial condition
 bc = dde.icbc.NeumannBC(geomtime, lambda x: 0, boundary, component=0)   # Define the Neumann boundary condition
 
@@ -203,10 +168,6 @@ data = dde.data.TimePDE(
     num_initial = 2787
 )
 
-
-# In[ ]:
-
-
 # Create the model using the defined data and neural network
 model01 = dde.Model(data, net)   
 # checkpointer = dde.callbacks.ModelCheckpoint("./model/model01", verbose=1, save_better_only=True, period=1000)
@@ -219,19 +180,11 @@ losshistory, train_state = model01.train(iterations=35000, display_every=1000
                                         )  
 # dde.saveplot(losshistory, train_state, issave=True, isplot=False)
 
-
-# In[ ]:
-
-
 model01.compile("L-BFGS"
                 , loss_weights=[20, 1, 10]
                )   # Compile the model with the L-BFGS optimizer and loss weights
 losshistory, train_state = model01.train(display_every=500, model_save_path= "./model/model01")   
 dde.saveplot(losshistory, train_state, issave=True, isplot=True) 
-
-
-# In[ ]:
-
 
 # model01.compile("L-BFGS")   # Compile the model with the L-BFGS optimizer
 # losshistory, train_state = model01.train(display_every=1000, model_save_path= "./model/model01")   # Train the model 
@@ -239,9 +192,6 @@ dde.saveplot(losshistory, train_state, issave=True, isplot=True)
 
 
 # ## To produce pinn solutions for different resolutions
-
-# In[ ]:
-
 
 lat_max = 70.0  
 lat_min = -70.0 
@@ -297,12 +247,7 @@ for i in range(len(res_lat_values)):
     variable_name = f"pinns_1D_{res_lat_values[i]}.npy"
     np.save(variable_name,meth1_new1)
 
-
 # ## Plotting
-
-# In[ ]:
-
-
 im = plt.imshow(meth1_new1.T*10, vmin=-5.0, vmax=5.0, aspect="auto", origin="lower", extent=[0, simul_time, lat_min, lat_max])
 plt.xlabel("Time")
 plt.ylabel("Latitude")
@@ -310,4 +255,3 @@ plt.title("PINNs")
 plt.colorbar(im, ax=axs, location="bottom", aspect=70, extend="both", label="B")
 plt.title("Magnetic field solving the 1D SFT equation")
 plt.show()
-
