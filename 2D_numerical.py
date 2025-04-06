@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 ## Importing required modules
 
 import numpy as np
@@ -14,11 +9,7 @@ import time as time
 
 ## End importing required modules
 
-
 # ## Code Units
-
-# In[ ]:
-
 
 ## The time in years for which the simulation is conducted
 simul_time = 0.30     # in years
@@ -36,11 +27,7 @@ V_unit = L_unit / T_unit    # Velocity unit in centimeters per second
 
 deg_2_rad = np.pi / 180.0
 
-
 # ## Constants and parameters
-
-# In[ ]:
-
 
 ##solar radius
 r = Rsun / L_unit   # (6.95e-10 cm)
@@ -60,10 +47,6 @@ B0 = 10.0/B_unit    # 10 Gauss
 ## Decay Time
 tau = 5.0*365.25*24.0*3600.0     #5.0 years
 tau = tau/T_unit
-
-
-# In[ ]:
-
 
 # Initial condition
 def initial(lam, phi):
@@ -102,20 +85,12 @@ def initial(lam, phi):
 
     delta_Br = B_plus - B_minus
     return delta_Br
-
-
-# In[ ]:
-
-
+    
 print("eta",eta)
 print("tau",tau)
 print("u_0",u_0)
 
-
 # ## Different terms of SFT
-
-# In[ ]:
-
 
 # Advection velocity
 @jit(nopython=True)
@@ -149,10 +124,6 @@ def diff_lon(eta,lam):
 @jit(nopython=True)
 def esc(lam, r, eta, tau_esc):
     return (1.0 / tau_esc + vel(lam) * np.tan(lam) / r - eta * (1.0 / np.cos(lam)**2) / r**2)
-
-
-# In[ ]:
-
 
 # Tridiagonal solver - Thomas algorithm
 @jit(nopython=True)
@@ -195,12 +166,8 @@ def tridiag2(n, a, b, c, d):
     new[0] = 0
     new[1] = 0
     return new
-
-
+    
 # # Simulation domain
-
-# In[ ]:
-
 
 lat_max = 0.40*180.0  # Maximum latitude in degrees
 lat_min = -0.40*180.0 # Minimum latitude in degrees
@@ -215,10 +182,6 @@ Tmin = 0.0   # Initial time stamp
 Tmax = 1.0 # Final time stamp
 num_files = 1000    #Number of time stamps for which the result is produced
 dt = (Tmax - Tmin) / num_files  # Time step size
-
-
-# In[ ]:
-
 
 # Latitude discretization
 dlat = (lat_max - lat_min) / res_lat  # Latitude step size
@@ -235,10 +198,6 @@ for i in range(len(lat_cen)):
     lat_width[i] = lat_right[i] - lat_left[i]
 #     print(lat_width[i])  
 
-
-# In[ ]:
-
-
 # Longitude discretization
 dlon = (lon_max - lon_min) / res_lon  # Latitude step size
 
@@ -254,16 +213,8 @@ for i in range(len(lon_cen)):
     lon_width[i] = lon_right[i] - lon_left[i]
 #     print(lon_width[i])  
 
-
-# In[ ]:
-
-
 B_Explicit = np.zeros((num_files+1,res_lat,res_lon)) 
 B_RK_IMEX = np.zeros((num_files+1,res_lat,res_lon)) 
-
-
-# In[ ]:
-
 
 ## initial condition
 
@@ -292,10 +243,6 @@ plt.show()
 B_Explicit[0] = mag
 B_RK_IMEX[0] = mag
 
-
-# In[ ]:
-
-
 courant_number = 0.4  # CFL number
 courant_array = np.zeros(res_lat)
 
@@ -319,10 +266,6 @@ else:
 print("steps =", nsub)
 print("CFL dt =", dt)
 
-
-# In[ ]:
-
-
 courant_array_lon = np.zeros((res_lon,res_lat))  
 
 for i in range(len(lon_cen)):
@@ -345,11 +288,7 @@ else:
 print("CFL dt =", dt)
 print("steps =", nsub)
 
-
 # ## Explicit Scheme
-
-# In[ ]:
-
 
 """
         Function used to update latitude using explicit scheme, returns the updated value
@@ -515,11 +454,7 @@ def lon_update(mag, nsub, dt, dt_glb):
 
     return mag
 
-
 # ## RK-IMEX
-
-# In[ ]:
-
 
 # Diffusion for RK-IMEX
 @jit(nopython = True)
@@ -833,11 +768,7 @@ def rkimex_lat(mag,time,dt):
         mag_new2[res_lat-1, lon] = mag_new2[res_lat-4, lon]
     return mag_new2
 
-
 # # Solving
-
-# In[ ]:
-
 
 # update using Explicit scheme
 time = np.zeros(num_files+1)
@@ -877,10 +808,6 @@ for i in tqdm(range(num_files)):
         
     B_RK_IMEX[i+1] = mag
 
-
-# In[ ]:
-
-
 ## To save the files
 # variable_name = f"numeric_2D_num_{res}.npy"
 # np.save(variable_name, B_explicit)
@@ -888,11 +815,7 @@ for i in tqdm(range(num_files)):
 # variable_name = f"numeric_2D_rk_{res}.npy"
 # np.save(variable_name, B_RK_IMEX)
 
-
 # ## Plotting
-
-# In[ ]:
-
 
 plt.imshow(B_Explicit[-1], origin="lower")#, aspect = 0.5)
 plt.xlabel('Longitude')
